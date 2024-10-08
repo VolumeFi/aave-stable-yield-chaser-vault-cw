@@ -35,8 +35,8 @@ pub enum ExecuteMsg {
     UpdateRefundWallet {
         new_refund_wallet: String,
     },
-    UpdateGasFee {
-        new_gas_fee: Uint256,
+    UpdateEntranceFee {
+        new_entrance_fee: Uint256,
     },
     UpdateServiceFeeCollector {
         new_service_fee_collector: String,
