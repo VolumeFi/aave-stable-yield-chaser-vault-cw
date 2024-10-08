@@ -52,8 +52,8 @@ pub fn execute(
         ExecuteMsg::UpdateRefundWallet { new_refund_wallet } => {
             execute::update_refund_wallet(deps, info, new_refund_wallet)
         }
-        ExecuteMsg::UpdateGasFee { new_gas_fee } => {
-            execute::update_gas_fee(deps, info, new_gas_fee)
+        ExecuteMsg::UpdateEntranceFee { new_entrance_fee } => {
+            execute::update_entrance_fee(deps, info, new_entrance_fee)
         }
         ExecuteMsg::UpdateServiceFeeCollector {
             new_service_fee_collector,
@@ -533,10 +533,10 @@ pub mod execute {
             .add_attribute("action", "update_refund_wallet"))
     }
 
-    pub fn update_gas_fee(
+    pub fn update_entrance_fee(
         deps: DepsMut,
         info: MessageInfo,
-        new_gas_fee: Uint256,
+        new_entrance_fee: Uint256,
     ) -> Result<Response<PalomaMsg>, ContractError> {
         let state = STATE.load(deps.storage)?;
         if state.owner != info.sender {
@@ -546,11 +546,11 @@ pub mod execute {
         let contract: Contract = Contract {
             constructor: None,
             functions: BTreeMap::from_iter(vec![(
-                "update_gas_fee".to_string(),
+                "update_entrance_fee".to_string(),
                 vec![Function {
-                    name: "update_gas_fee".to_string(),
+                    name: "update_entrance_fee".to_string(),
                     inputs: vec![Param {
-                        name: "new_gas_fee".to_string(),
+                        name: "new_entrance_fee".to_string(),
                         kind: ParamType::Uint(256),
                         internal_type: None,
                     }],
@@ -570,16 +570,16 @@ pub mod execute {
                 job_id: state.job_id,
                 payload: Binary::new(
                     contract
-                        .function("update_gas_fee")
+                        .function("update_entrance_fee")
                         .unwrap()
                         .encode_input(&[Token::Uint(Uint::from_big_endian(
-                            &new_gas_fee.to_be_bytes(),
+                            &new_entrance_fee.to_be_bytes(),
                         ))])
                         .unwrap(),
                 ),
                 metadata: state.metadata,
             }))
-            .add_attribute("action", "update_gas_fee"))
+            .add_attribute("action", "update_entrance_fee"))
     }
 
     pub fn update_service_fee_collector(
