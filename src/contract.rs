@@ -118,11 +118,6 @@ pub mod execute {
                             ]),
                             internal_type: None,
                         },
-                        Param {
-                            name: "receiver".to_string(),
-                            kind: ParamType::Address,
-                            internal_type: None,
-                        },
                     ],
                     outputs: Vec::new(),
                     constant: None,
@@ -156,7 +151,6 @@ pub mod execute {
                 &env.block.time,
             )?;
         }
-
         if tokens.is_empty() {
             Err(AllPending {})
         } else {
@@ -179,19 +173,19 @@ pub mod execute {
     fn get_change_asset_tokens(new_asset: String, swap_info: SwapInfo) -> Vec<Token> {
         let token_new_asset: Token = Token::Address(Address::from_str(new_asset.as_str()).unwrap());
         let mut token_swap_info: Vec<Token> = Vec::new();
-        token_swap_info.push(Token::Array(
+        token_swap_info.push(Token::FixedArray(
             swap_info
                 .route
                 .iter()
                 .map(|x| Token::Address(Address::from_str(x.as_str()).unwrap()))
                 .collect(),
         ));
-        token_swap_info.push(Token::Array(
+        token_swap_info.push(Token::FixedArray(
             swap_info
                 .swap_params
                 .iter()
                 .map(|x| {
-                    Token::Array(
+                    Token::FixedArray(
                         x.iter()
                             .map(|y| Token::Uint(Uint::from_big_endian(&y.to_be_bytes())))
                             .collect(),
@@ -205,7 +199,7 @@ pub mod execute {
         token_swap_info.push(Token::Uint(Uint::from_big_endian(
             &swap_info.expected.to_be_bytes(),
         )));
-        token_swap_info.push(Token::Array(
+        token_swap_info.push(Token::FixedArray(
             swap_info
                 .pools
                 .iter()
@@ -310,19 +304,19 @@ pub mod execute {
 
     fn get_withdraw_tokens(swap_info: SwapInfo, receiver: String) -> Vec<Token> {
         let mut token_swap_info: Vec<Token> = Vec::new();
-        token_swap_info.push(Token::Array(
+        token_swap_info.push(Token::FixedArray(
             swap_info
                 .route
                 .iter()
                 .map(|x| Token::Address(Address::from_str(x.as_str()).unwrap()))
                 .collect(),
         ));
-        token_swap_info.push(Token::Array(
+        token_swap_info.push(Token::FixedArray(
             swap_info
                 .swap_params
                 .iter()
                 .map(|x| {
-                    Token::Array(
+                    Token::FixedArray(
                         x.iter()
                             .map(|y| Token::Uint(Uint::from_big_endian(&y.to_be_bytes())))
                             .collect(),
@@ -336,7 +330,7 @@ pub mod execute {
         token_swap_info.push(Token::Uint(Uint::from_big_endian(
             &swap_info.expected.to_be_bytes(),
         )));
-        token_swap_info.push(Token::Array(
+        token_swap_info.push(Token::FixedArray(
             swap_info
                 .pools
                 .iter()
@@ -704,4 +698,89 @@ pub fn query(_deps: Deps, _env: Env, _msg: QueryMsg) -> StdResult<Binary> {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+    use crate::msg::{ExecuteMsg, SwapInfo};
+    use cosmwasm_std::testing::{message_info, mock_dependencies, mock_env};
+    use cosmwasm_std::{Addr, Uint256};
+
+    #[test]
+    fn test_change_asset() {
+        let mut deps = mock_dependencies();
+        let env = mock_env();
+        let info = message_info(&Addr::unchecked("creator"), &[]);
+        let msg = InstantiateMsg {
+            retry_delay: 10,
+            job_id: "job_id".to_string(),
+            creator: "creator".to_string(),
+            signers: vec!["signer".to_string()],
+        };
+
+        instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+        let msg = ExecuteMsg::ChangeAsset {
+            new_asset: "0x0000000000000000000000000000000000000000".to_string(),
+            swap_info: SwapInfo {
+                route: vec![
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                ],
+                swap_params: vec![
+                    vec![
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                    ],
+                    vec![
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                    ],
+                    vec![
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                    ],
+                    vec![
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                    ],
+                    vec![
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                        Uint256::from(0u8),
+                    ],
+                ],
+                amount: Uint256::from(0u8),
+                expected: Uint256::from(0u8),
+                pools: vec![
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                    "0x0000000000000000000000000000000000000000".to_string(),
+                ],
+            },
+        };
+        execute(deps.as_mut(), env, info, msg).unwrap();
+    }
+}
